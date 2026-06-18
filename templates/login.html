@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - AI小说写作助手</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .login-container {
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 20px;
+        }
+        .login-card {
+            background: var(--bg-secondary); border-radius: 16px;
+            border: 1px solid var(--border); padding: 40px;
+            width: 400px; max-width: 95vw;
+            box-shadow: var(--shadow-lg);
+        }
+        .login-card h1 { text-align: center; margin-bottom: 8px; font-size: 24px; color: var(--accent); }
+        .login-card .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 28px; font-size: 13px; }
+        .login-card .mode-switch {
+            display: flex; gap: 0; margin-bottom: 24px;
+            background: var(--bg-input); border-radius: var(--radius-sm); padding: 3px;
+        }
+        .login-card .mode-btn {
+            flex: 1; padding: 8px; border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer; font-size: 14px;
+            font-family: var(--font-ui); border-radius: var(--radius-xs);
+            transition: all var(--transition);
+        }
+        .login-card .mode-btn.active { background: var(--bg-card); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+        .login-card .error-msg {
+            background: rgba(211,93,78,0.15); color: var(--danger);
+            padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px;
+            font-size: 13px; display: none;
+        }
+        .login-card .success-msg {
+            background: rgba(106,171,115,0.15); color: var(--success);
+            padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px;
+            font-size: 13px; display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <h1>📖 AI小说写作助手</h1>
+            <p class="subtitle">登录以继续创作</p>
+
+            <div class="mode-switch">
+                <button class="mode-btn active" onclick="switchMode('login')" id="loginTab">登录</button>
+                <button class="mode-btn" onclick="switchMode('register')" id="registerTab">注册</button>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="success-msg" id="successMsg"></div>
+
+            <div id="loginForm">
+                <div class="form-group">
+                    <label for="loginUser">用户名</label>
+                    <input type="text" id="loginUser" placeholder="输入用户名" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPass">密码</label>
+                    <input type="password" id="loginPass" placeholder="输入密码" autocomplete="current-password">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="doLogin()">🔑 登录</button>
+            </div>
+
+            <div id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label for="regUser">用户名</label>
+                    <input type="text" id="regUser" placeholder="至少2个字符" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="regPass">密码</label>
+                    <input type="password" id="regPass" placeholder="至少4个字符" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="regPass2">确认密码</label>
+                    <input type="password" id="regPass2" placeholder="再次输入密码">
+                </div>
+                <button class="btn btn-primary btn-block" onclick="doRegister()">✨ 注册并登录</button>
+                <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-muted);">
+                    💡 第一个注册的用户自动成为管理员
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'login';
+
+        function switchMode(m) {
+            mode = m;
+            document.getElementById('loginTab').classList.toggle('active', m === 'login');
+            document.getElementById('registerTab').classList.toggle('active', m === 'register');
+            document.getElementById('loginForm').style.display = m === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = m === 'register' ? 'block' : 'none';
+            hideMsg();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            el.textContent = msg; el.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMsg');
+            el.textContent = msg; el.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function hideMsg() {
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('successMsg').style.display = 'none';
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value;
+            if (!username || !password) return showError('请填写用户名和密码');
+
+            try {
+                const r = await fetch('/api/auth/login', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const d = await r.json();
+                if (d.success) {
+                    window.location.href = '/';
+                } else {
+                    showError(d.error || '登录失败');
+                }
+            } catch (e) {
+                showError('网络错误，请重试');
+            }
+        }
+
+        async function doRegister() {
+            const username = document.getElementById('regUser').value.trim();
+            const password = document.getElementById('regPass').value;
+            const password2 = document.getElementById('regPass2').value;
+            if (!username || !password) return showError('请填写用户名和密码');
+            if (password !== password2) return showError('两次密码不一致');
+            if (password.length < 4) return showError('密码至少4个字符');
+
+            try {
+                const r = await fetch('/api/auth/register', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showSuccess('注册成功！正在跳转...');
+                    setTimeout(() => { window.location.href = '/'; }, 800);
+                } else {
+                    showError(d.error || '注册失败');
+                }
+            } catch (e) {
+                showError('网络错误，请重试');
+            }
+        }
+
+        // 回车键登录
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                mode === 'login' ? doLogin() : doRegister();
+            }
+        });
+
+        // 自动聚焦
+        document.getElementById('loginUser').focus();
+    </script>
+</body>
+</html>

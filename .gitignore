@@ -1,0 +1,28 @@
+# 数据目录（包含用户的小说内容）
+data/
+
+# 导出目录
+exports/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# 个人敏感文件
+我的操作手册.md
+资料/
+to_be_done.txt
+natapp*.exe
+run_natapp*.bat
+*.authtoken
+
+# OS
+.DS_Store
+Thumbs.db

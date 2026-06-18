@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI小说写作助手</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Google Fonts: 思源宋体 + 思源黑体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 设置面板 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal" style="width:560px;">
+            <div class="modal-header">
+                <h2>⚙️ 设置</h2>
+                <button class="btn-icon modal-close" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="stab active" onclick="switchSettingsTab('api')">🔑 API</button>
+                    <button class="stab" onclick="switchSettingsTab('appearance')">🎨 外观</button>
+                    <button class="stab" onclick="switchSettingsTab('writing')">✍️ 写作</button>
+                </div>
+
+                <!-- API设置 -->
+                <div class="settings-panel active" id="settingsApi">
+                    <div class="form-group">
+                        <label for="apiProvider">API 服务商</label>
+                        <select id="apiProvider" onchange="onProviderChange()">
+                            <option value="deepseek" data-base="https://api.deepseek.com/v1" data-model="deepseek-chat" data-models="deepseek-chat,deepseek-reasoner">DeepSeek（国产，审核严格）</option>
+                            <option value="openai" data-base="https://api.openai.com/v1" data-model="gpt-4o" data-models="gpt-4o,gpt-4-turbo,gpt-4">OpenAI（文学创作推荐 ⭐）</option>
+                            <option value="custom" data-base="" data-model="" data-models="">自定义 / 其他兼容服务商</option>
+                        </select>
+                        <small>⭐ 如遇内容拦截，切换至 OpenAI 可解决大部分问题</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" placeholder="sk-...">
+                        <small>仅保存在浏览器本地，不会上传</small>
+                    </div>
+                    <div class="form-group" id="apiBaseGroup">
+                        <label for="apiBase">API Base URL</label>
+                        <input type="text" id="apiBase" value="https://api.deepseek.com/v1">
+                    </div>
+                    <div class="form-group">
+                        <label for="modelSelect">模型</label>
+                        <select id="modelSelect">
+                            <option value="deepseek-chat">DeepSeek V3</option>
+                            <option value="deepseek-reasoner">DeepSeek R1 (推理)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 外观设置 -->
+                <div class="settings-panel" id="settingsAppearance" style="display:none;">
+                    <div class="form-group">
+                        <label>主题模式</label>
+                        <div style="display:flex;gap:10px;">
+                            <button class="btn btn-outline theme-btn active" onclick="setTheme('dark',this)" id="themeDark">🌙 暗色</button>
+                            <button class="btn btn-outline theme-btn" onclick="setTheme('light',this)" id="themeLight">☀️ 亮色</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>背景</label>
+                        <div class="color-presets" id="bgColorPresets">
+                            <span class="color-preset active" data-bg="" style="background:var(--bg-primary);" title="默认"></span>
+                            <span class="color-preset" data-bg="#f5f0e8" style="background:#f5f0e8;" title="羊皮纸"></span>
+                            <span class="color-preset" data-bg="#f0ebe3" style="background:#f0ebe3;" title="暖米"></span>
+                            <span class="color-preset" data-bg="#e8edf2" style="background:#e8edf2;" title="淡蓝"></span>
+                            <span class="color-preset" data-bg="#1a1a24" style="background:#1a1a24;" title="深黑"></span>
+                            <span class="color-preset" data-bg="#1a221a" style="background:#1a221a;" title="墨绿"></span>
+                        </div>
+                        <small>或输入背景图片URL：</small>
+                        <input type="text" id="bgImageUrl" placeholder="https://example.com/bg.jpg">
+                        <button class="btn btn-sm btn-outline" onclick="applyBgImage()" style="margin-top:6px;">应用背景图</button>
+                        <button class="btn btn-sm btn-outline" onclick="clearBgImage()" style="margin-top:6px;">清除背景图</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>正文字体</label>
+                        <div class="font-presets" id="fontPresets">
+                            <button class="font-preset" data-font='"Noto Serif SC","STSong","SimSun",serif' style="font-family:'Noto Serif SC',serif;">
+                                思源宋体 — 经典优雅，适合长文阅读
+                            </button>
+                            <button class="font-preset" data-font='"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif' style="font-family:'Noto Sans SC',sans-serif;">
+                                思源黑体 — 清晰现代，适合屏幕阅读
+                            </button>
+                            <button class="font-preset" data-font='"STKaiti","KaiTi","STSong",serif' style="font-family:'STKaiti','KaiTi',serif;">
+                                楷体 — 传统书法风格
+                            </button>
+                            <button class="font-preset" data-font='"SimSun","STSong","Songti SC",serif' style="font-family:'SimSun',serif;">
+                                宋体 — 印刷正文字体
+                            </button>
+                            <button class="font-preset" data-font='"Microsoft YaHei","PingFang SC",sans-serif' style="font-family:'Microsoft YaHei',sans-serif;">
+                                微软雅黑 — Windows系统默认
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 写作设置 -->
+                <div class="settings-panel" id="settingsWriting" style="display:none;">
+                    <div class="form-group">
+                        <label for="temperature">创意度: <span id="tempValue">0.8</span></label>
+                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.8">
+                        <small>0=严谨保守，1=平衡，2=天马行空</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxTokens">最大生成长度</label>
+                        <select id="maxTokens">
+                            <option value="2048">2048 tokens (~1500字)</option>
+                            <option value="4096" selected>4096 tokens (~3000字)</option>
+                            <option value="8192">8192 tokens (~6000字)</option>
+                            <option value="16384">16384 tokens (~12000字)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top:8px;">💾 保存所有设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建小说弹窗 -->
+    <div class="modal-overlay" id="newNovelModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>📖 创建新小说</h2>
+                <button class="btn-icon modal-close" onclick="closeNewNovel()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="novelTitle">小说标题</label>
+                    <input type="text" id="novelTitle" placeholder="输入小说标题（可后续修改）">
+                </div>
+                <div class="form-group">
+                    <label for="novelCharacters">角色设定（可选，留空让AI建议）</label>
+                    <textarea id="novelCharacters" rows="3" placeholder="主角：张三，一个年轻的侠客&#10;女主：李四，神秘的女剑客&#10;（每行一个角色）"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="novelPlot">情节大纲（可选，留空让AI构思）</label>
+                    <textarea id="novelPlot" rows="4" placeholder="简单描述你想要的故事走向...&#10;（也可以留空，在对话中和AI讨论）"></textarea>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="createNovel()">✨ 创建小说</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出弹窗 -->
+    <div class="modal-overlay" id="exportModal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>📥 导出小说</h2>
+                <button class="btn-icon modal-close" onclick="closeExport()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:16px;color:var(--text-secondary);">选择导出格式：</p>
+                <div class="export-options">
+                    <button class="btn btn-outline btn-block" onclick="exportNovel('txt')">📄 TXT 文本文件</button>
+                    <button class="btn btn-outline btn-block" onclick="exportNovel('docx')">📝 Word 文档 (.docx)</button>
+                    <button class="btn btn-outline btn-block" onclick="exportNovel('pdf')">📕 PDF 文档 (.pdf)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认弹窗（AI建议角色/情节时使用） -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="confirmTitle">🤖 AI建议</h2>
+                <button class="btn-icon modal-close" onclick="closeConfirm()">✕</button>
+            </div>
+            <div class="modal-body" id="confirmBody"></div>
+            <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeConfirm()">❌ 拒绝</button>
+                <button class="btn btn-primary" id="confirmAcceptBtn" onclick="acceptConfirm()">✅ 接受</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑角色/情节弹窗 -->
+    <div class="modal-overlay" id="editCharPlotModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="editCpTitle">✏️ 编辑</h2>
+                <button class="btn-icon modal-close" onclick="closeCharPlotEdit()">✕</button>
+            </div>
+            <div class="modal-body" id="editCpBody"></div>
+            <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeCharPlotEdit()">取消</button>
+                <button class="btn btn-primary" onclick="saveCharPlotEdit()">💾 保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示词调试弹窗 -->
+    <div class="modal-overlay" id="debugModal">
+        <div class="modal" style="width:700px;max-width:95vw;">
+            <div class="modal-header">
+                <h2>🔍 提示词调试</h2>
+                <button class="btn-icon modal-close" onclick="closeDebug()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-secondary);margin-bottom:12px;">以下是你最后一次发送给AI的完整提示词结构。检查系统提示词和上下文是否完整送达。</p>
+                <div class="form-group">
+                    <label>系统提示词 (System Prompt) — 始终发送</label>
+                    <textarea readonly id="debugSystem" rows="8" style="font-size:11px;font-family:monospace;background:var(--bg-input);"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>上下文信息 (Context) — 角色+情节+已有内容</label>
+                    <textarea readonly id="debugContext" rows="6" style="font-size:11px;font-family:monospace;background:var(--bg-input);"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>消息前缀 (自动附加)</label>
+                    <textarea readonly id="debugPrefix" rows="2" style="font-size:11px;font-family:monospace;background:var(--bg-input);"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>用户原始消息</label>
+                    <textarea readonly id="debugUserMsg" rows="3" style="font-size:11px;font-family:monospace;background:var(--bg-input);"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理面板弹窗 -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal" style="width:700px;max-width:95vw;">
+            <div class="modal-header">
+                <h2>👑 管理面板</h2>
+                <button class="btn-icon modal-close" onclick="closeAdminPanel()">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color:var(--text-muted);margin-bottom:16px;font-size:13px;">查看所有用户的小说，可删除不当内容。</p>
+                <div class="form-group">
+                    <label>所有小说</label>
+                    <div id="adminNovelList" style="max-height:400px;overflow-y:auto;">
+                        <div class="empty-hint">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="app-container">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="btn-icon" id="sidebarToggle" title="侧边栏">☰</button>
+                <span class="app-logo">📖 AI小说助手</span>
+                <span class="current-novel" id="currentNovelTitle">未选择小说</span>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-sm btn-outline" id="adminBtn" onclick="openAdminPanel()" style="display:none;" title="管理面板">👑</button>
+                <button class="btn btn-sm btn-outline" onclick="setTheme(document.documentElement.dataset.theme==='light'?'dark':'light')" title="切换主题">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="openNewNovel()">✨ 新建</button>
+                <button class="btn btn-sm btn-outline" onclick="openExport()" id="exportBtn" disabled>📥 导出</button>
+                <button class="btn btn-sm btn-outline" onclick="openSettings()">⚙️</button>
+                <span style="color:var(--text-muted);font-size:12px;margin:0 4px;" id="userInfo"></span>
+                <button class="btn btn-sm btn-outline" onclick="doLogout()" title="退出登录">🚪</button>
+            </div>
+        </header>
+
+        <div class="main-area">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <h3>📚 我的小说</h3>
+                    <div class="novel-list" id="novelList">
+                        <div class="empty-hint">暂无小说，点击上方 ✨新建</div>
+                    </div>
+                </div>
+                <div class="sidebar-section" id="charSection" style="display:none;">
+                    <h3>👥 角色管理</h3>
+                    <div class="character-list" id="characterList"></div>
+                    <button class="btn btn-sm btn-outline" onclick="editCharacters()" style="width:100%;margin-top:10px;">✏️ 编辑角色</button>
+                </div>
+                <div class="sidebar-section" id="plotSection" style="display:none;">
+                    <h3>📋 情节大纲</h3>
+                    <div class="plot-summary" id="plotSummary"></div>
+                    <button class="btn btn-sm btn-outline" onclick="editPlot()" style="width:100%;margin-top:10px;">✏️ 编辑大纲</button>
+                </div>
+            </aside>
+
+            <div class="content-area">
+                <div class="chat-panel" id="chatPanel">
+                    <div class="chat-header">
+                        <span>💬 AI对话</span>
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-sm btn-outline" onclick="showPromptDebug()" title="查看发送给AI的提示词">🔍</button>
+                            <button class="btn btn-sm btn-outline" onclick="clearChat()" title="清空对话">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="welcome-message">
+                            <div class="welcome-icon">📖</div>
+                            <h2>欢迎使用AI小说写作助手</h2>
+                            <p>请先创建一部小说，或选择已有小说</p>
+                            <ul>
+                                <li>AI帮你设计角色和情节</li>
+                                <li>写出精彩故事内容</li>
+                                <li>随时提出修改或调整</li>
+                                <li>右侧面板可手动编辑</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="chat-input-row">
+                            <textarea id="chatInput" placeholder="请先创建或选择一部小说..." rows="2"></textarea>
+                        </div>
+                        <div class="chat-input-actions">
+                            <div class="chat-actions-left">
+                                <button class="btn btn-sm btn-outline" id="genCharBtn" onclick="generateCharacters()" disabled title="让AI自动生成角色资料卡">🎭 生成角色卡</button>
+                                <button class="btn btn-sm btn-outline" id="genPlotBtn" onclick="generatePlot()" disabled title="让AI自动生成情节大纲">📋 生成大纲</button>
+                                <button class="btn btn-sm btn-outline" id="continueBtn" onclick="continueWriting()" disabled>▶ 续写</button>
+                            </div>
+                            <div class="chat-actions-right">
+                                <button class="btn btn-sm btn-danger" id="stopBtn" onclick="stopGeneration()" style="display:none;">⏹ 停止</button>
+                                <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()" disabled>📤 发送</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="novel-panel" id="novelPanel">
+                    <div class="novel-header">
+                        <span>📝 小说正文</span>
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" onclick="switchTab('full')" id="tabFull">完整内容</button>
+                            <button class="tab-btn" onclick="switchTab('new')" id="tabNew">本次新增</button>
+                        </div>
+                    </div>
+                    <div class="novel-content" id="novelContent">
+                        <div class="empty-hint">选择一部小说以查看内容</div>
+                    </div>
+                    <div class="novel-actions" style="display:none;" id="novelActions">
+                        <button class="btn btn-sm btn-outline" onclick="toggleEditMode()" id="editToggleBtn">✏️ 编辑模式</button>
+                        <button class="btn btn-sm btn-primary" onclick="saveContentEdit()" id="saveEditBtn" style="display:none;">💾 保存修改</button>
+                        <button class="btn btn-sm btn-outline" onclick="cancelEditMode()" id="cancelEditBtn" style="display:none;">↩ 取消</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/novel.js"></script>
+    <script src="/static/js/chat.js"></script>
+    <script src="/static/js/editor.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
