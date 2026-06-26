@@ -89,12 +89,31 @@ The Full Version offers deeper optimization in AI interaction — specifically d
 - [x] 多用户认证与数据隔离 / Multi-user auth & data isolation
 - [x] 智能内容增删 (追加 vs 替换) / Smart content diff
 - [x] AI 自动生成角色资料卡与情节大纲 / Auto-generated profiles & outlines
-- [~] ~~网页部署与持久化公网访问~~（已放弃 / Abandoned） / Web deployment with public access
+- [x] 自动续写（一路写到底） / Auto-continue mode
+- [~] ~~网页部署与持久化公网访问~~（已放弃 / Abandoned）
 - [ ] PWA 移动端安装支持 / PWA support for mobile
 - [ ] Android APK (手机独立运行) / Standalone Android APK
 - [ ] 版本历史与写作快照 / Version history & snapshots
 - [ ] 实时协作写作 / Real-time collaborative writing
 - [ ] 更多 AI 服务商接入 / More AI provider integrations
+
+## 📋 更新日志 · Changelog
+
+### v0.2.0 — 2026-06-11
+
+- **🚀 自动续写**：新增「一路写到底」按钮，一键自动续写多段，写完自动继续，直到大纲结束或手动停止
+- **🛡️ 内容安全保护**：AI 异常返回（拒绝消息、过短内容）时自动拦截，防止全文被错误覆盖
+- **📝 标签机制优化**：系统提示词中重写了内容标签的使用说明，AI 更清楚「追加」「替换」「建议」的区分，减少误操作
+- **👥 快速生成按钮**：新增「生成角色卡」和「生成大纲」快捷按钮，一键让 AI 输出结构化设定
+- **🎨 UI 优化**：替换内容折叠显示（不刷屏）、编辑弹窗替代原生 prompt、主题/字体/背景自定义
+- **🔍 调试面板**：可查看当前发送给 AI 的完整上下文与系统提示词
+
+### v0.1.0 — 2026-06-10
+
+- 首个社区版发布
+- 基础功能：AI 协作写作、角色与情节管理、多用户系统、多格式导出、多服务商支持
+
+---
 
 ## 🤝 联系方式 · Contact
 
