@@ -65,24 +65,6 @@ python app.py
 | 情节大纲 / Plot | 点击 📋 让 AI 自动生成 |
 | 导出 / Export | 点击 📥 选择格式 |
 
-## ⚠️ 关于版本 · About Versions
-
-**本仓库为社区版（轻量试用版）。**
-
-**This repository contains the Community Edition (Lite Version).**
-
-完整版在 AI 交互层面进行了更深入的优化——旨在减少创作过程中 AI 对合理文学情节的**误判和不当拒绝**。当前许多大语言模型的内容审核机制过于宽泛，常常将正常的小说创作内容错误地标记为"敏感"，例如：战斗与冲突场面、角色的道德困境与灰色选择、悲剧情节与死亡描写、复杂的人物关系发展、对社会现象的文学化呈现，等等。这些内容在任何一部成熟的文学作品中都司空见惯，却频频被 AI 拒之门外——这不仅打断了创作流程，也严重限制了作者正常表达的空间。完整版通过更精准的上下文引导，帮助 AI 更好地理解"这是一部文学作品"这一基本前提，让作者能够在艺术表达的合理范围内正常创作。
-
-The Full Version offers deeper optimization in AI interaction — specifically designed to reduce **false positives in content moderation** during creative writing. Many LLMs today employ overly broad content filters that mistakenly flag perfectly normal novel content as "sensitive": battle and conflict scenes, moral dilemmas and gray-area choices, tragedy and death, complex character relationships, literary depictions of social issues, and more. These elements are commonplace in any mature literary work, yet they are frequently blocked by AI — disrupting the creative flow and severely limiting the author's expressive range. The Full Version provides more precise contextual guidance to help the AI recognize the fundamental premise that "this is a literary work," enabling authors to write normally within the bounds of artistic expression.
-
-**需要强调的是**，完整版严格遵循中华人民共和国法律法规，优化措施**仅服务于文学艺术创作**，严禁用于任何非法行为或生成违法违规内容。出于对我国法律的尊重与遵守，完整版不会、也从未计划公开发布。
-
-**Important**: The Full Version strictly complies with the laws of the People's Republic of China. All optimizations are designed **solely for legitimate literary and artistic creation**, and must never be used for illegal activities or generating prohibited content. Out of respect for and compliance with applicable laws, the Full Version is intentionally kept private and has no plan for public release.
-
-> 随着 AI 模型本身的不断进步，其理解能力和上下文判断力将持续提升，两个版本之间的体验差距也将逐渐缩小。与此同时，社区版和完整版均会不定期更新，持续改进功能和创作体验。
->
-> As AI models grow more intelligent and context-aware over time, the experience gap between the two versions will naturally narrow. Both editions will continue to receive regular updates and improvements.
-
 ## 🔮 发展规划 · Roadmap
 
 - [x] 本地浏览器应用 / Local browser-based application
@@ -110,7 +92,7 @@ The Full Version offers deeper optimization in AI interaction — specifically d
 
 ### v0.1.0 — 2026-06-10
 
-- 首个社区版发布
+- 首个版本发布
 - 基础功能：AI 协作写作、角色与情节管理、多用户系统、多格式导出、多服务商支持
 
 ---
