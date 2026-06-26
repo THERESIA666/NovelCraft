@@ -89,7 +89,7 @@ The Full Version offers deeper optimization in AI interaction — specifically d
 - [x] 多用户认证与数据隔离 / Multi-user auth & data isolation
 - [x] 智能内容增删 (追加 vs 替换) / Smart content diff
 - [x] AI 自动生成角色资料卡与情节大纲 / Auto-generated profiles & outlines
-- [ ] 网页部署与持久化公网访问 / Web deployment with public access
+- [~] ~~网页部署与持久化公网访问~~（已放弃 / Abandoned） / Web deployment with public access
 - [ ] PWA 移动端安装支持 / PWA support for mobile
 - [ ] Android APK (手机独立运行) / Standalone Android APK
 - [ ] 版本历史与写作快照 / Version history & snapshots
