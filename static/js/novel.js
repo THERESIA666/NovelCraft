@@ -73,6 +73,7 @@ async function selectNovel(novelId) {
         document.getElementById('continueBtn').disabled = false;
         document.getElementById('genCharBtn').disabled = false;
         document.getElementById('genPlotBtn').disabled = false;
+        document.getElementById('autoContinueBtn').disabled = false;
         document.getElementById('sendBtn').disabled = false;
 
         // 显示侧边栏信息

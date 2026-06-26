@@ -409,6 +409,154 @@ function setGenerating(generating) {
 
 // ==================== 快捷生成：角色资料卡 & 情节大纲 ====================
 
+// ==================== 自动一路写到底 ====================
+
+let isAutoContinuing = false;
+let autoContinueMax = 20; // 最多循环20次防止死循环
+let autoContinueCount = 0;
+
+async function autoContinueAll() {
+    if (isAutoContinuing || isGenerating || !currentNovelId) return;
+
+    const apiKey = localStorage.getItem('xs_api_key');
+    if (!apiKey) { showToast('⚠️ 请先配置API Key'); openSettings(); return; }
+
+    isAutoContinuing = true;
+    autoContinueCount = 0;
+
+    document.getElementById('autoContinueBtn').textContent = '⏹ 停止';
+    document.getElementById('autoContinueBtn').classList.add('btn-danger');
+    document.getElementById('continueBtn').disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    showToast('🚀 开始自动续写，写完一段后自动继续...');
+
+    await autoContinueLoop();
+}
+
+async function autoContinueLoop() {
+    if (!isAutoContinuing) {
+        finishAutoContinue();
+        return;
+    }
+
+    if (autoContinueCount >= autoContinueMax) {
+        showToast('📋 已达到最大续写次数（' + autoContinueMax + '次），自动停止');
+        finishAutoContinue();
+        return;
+    }
+
+    autoContinueCount++;
+
+    // 记录当前内容长度，用于后续检测是否有新增
+    const prevLength = (fullContent || '').length;
+
+    // 调用续写（复用已有逻辑）
+    await doContinueWriting();
+
+    // 等待一小段确保保存完成
+    await sleep(2000);
+
+    // 检查是否有新增内容
+    const newLength = (fullContent || '').length;
+    if (newLength <= prevLength) {
+        showToast('📋 本次续写无新增内容，可能已到大纲结尾，自动停止');
+        finishAutoContinue();
+        return;
+    }
+
+    // 继续下一轮
+    setTimeout(() => autoContinueLoop(), 500);
+}
+
+// 把续写逻辑抽出来方便自动调用
+async function doContinueWriting() {
+    if (!currentNovelId) return;
+
+    const apiKey = localStorage.getItem('xs_api_key');
+    if (!apiKey) return;
+
+    const config = getConfig();
+    addMessage('user', '请继续写下一段（第' + autoContinueCount + '次自动续写）');
+
+    currentAssistantMessage = addMessage('assistant', '');
+    const contentEl = currentAssistantMessage.querySelector('.message-content');
+
+    setGenerating(true);
+    let fullResponse = '';
+
+    try {
+        const resp = await fetch('/api/novels/' + currentNovelId + '/continue', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: currentNovelId,
+                api_key: apiKey,
+                api_base: config.apiBase,
+                model: config.model,
+                temperature: config.temperature,
+                max_tokens: config.maxTokens,
+            }),
+        });
+
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const raw = line.slice(6);
+                    if (raw === '[DONE]') continue;
+                    try {
+                        const p = JSON.parse(raw);
+                        if (p.error) contentEl.innerHTML += '<span style="color:var(--danger)">' + escapeHtml(p.error) + '</span>';
+                        else if (p.content) { fullResponse += p.content; contentEl.innerHTML = renderMessageContent(fullResponse); }
+                    } catch (e) {}
+                }
+            }
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        if (fullResponse) {
+            await saveAndHandleResponse('请继续写下一段（自动续写#' + autoContinueCount + '）', fullResponse);
+        }
+    } catch (e) {
+        contentEl.innerHTML += '<span style="color:var(--danger)">请求失败: ' + escapeHtml(e.message) + '</span>';
+        showToast('❌ 自动续写出错，已停止');
+        finishAutoContinue();
+    }
+
+    setGenerating(false);
+}
+
+function finishAutoContinue() {
+    isAutoContinuing = false;
+    autoContinueCount = 0;
+    document.getElementById('autoContinueBtn').textContent = '🚀 一路写到底';
+    document.getElementById('autoContinueBtn').classList.remove('btn-danger');
+    document.getElementById('continueBtn').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+}
+
+// 点击停止按钮也停自动续写
+const origStopGeneration = stopGeneration;
+stopGeneration = function() {
+    if (isAutoContinuing) {
+        finishAutoContinue();
+        showToast('⏹ 已停止自动续写');
+    }
+    origStopGeneration();
+};
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
 async function generateCharacters() {
     if (isGenerating || !currentNovelId) return;
 
