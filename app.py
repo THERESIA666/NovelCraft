@@ -231,6 +231,18 @@ def save_chat():
     # 替换内容 → 完全替换
     replace_content = _extract_tagged_content(response_text, '替换内容')
     if replace_content:
+        # 安全检查：防止AI用拒绝消息覆盖全文
+        if _is_refusal(replace_content):
+            result['content_updated'] = False
+            result['warning'] = 'AI返回了疑似拒绝内容，已阻止覆盖全文'
+            return jsonify(result)
+        # 安全检查：替换内容过短时拦截
+        current_content = get_novel_manager().get_content(novel_id)
+        if len(current_content) > 1000 and len(replace_content) < 50:
+            result['content_updated'] = False
+            result['warning'] = 'AI返回替换内容过短，疑似出错，已阻止覆盖'
+            return jsonify(result)
+
         get_novel_manager().save_content(novel_id, replace_content)
         novel = get_novel_manager().get_novel(novel_id)
         novel['new_content'] = replace_content
@@ -279,6 +291,19 @@ def apply_suggestion(novel_id):
         return jsonify({'success': False, 'error': '无效的建议类型'}), 400
     get_novel_manager().save_novel(novel_id, novel)
     return jsonify({'success': True, 'novel': novel})
+
+
+def _is_refusal(text):
+    """检测文本是否为AI拒绝响应"""
+    refusal_patterns = ['抱歉', '我无法', '不能生成', '不能继续', '违反',
+                        '色情', '换个话题', '不建议', '请理解']
+    text_stripped = text.strip()
+    if len(text_stripped) < 100:
+        for p in refusal_patterns:
+            if p in text_stripped: return True
+    if len(text_stripped) < 300:
+        if sum(1 for p in refusal_patterns if p in text_stripped) >= 2: return True
+    return False
 
 
 def _extract_tagged_content(text, tag_name):
