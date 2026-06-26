@@ -1,10 +1,27 @@
-# AI 小说写作助手 · AI Novel Assistant
+# 小说创作工坊 · NovelCraft
 
 [![License](https://img.shields.io/badge/License-CC_BY--NC_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
 
-基于大语言模型的智能写作工具，辅助作者完成从角色设计、情节构思到正文写作、修改润色、导出成稿的全流程创作。
+**NovelCraft** 是一个基于大语言模型的小说创作辅助工具，旨在为写作者提供一个**结构化、高效率、可协作**的智能写作环境。
 
-An intelligent writing tool powered by large language models — assisting authors from character design and plot outlining, to drafting chapters, revising content, and exporting finished works.
+无论你是网文作者、同人写手、还是刚刚开始尝试写作的新人，NovelCraft 都能帮助你跨越从"灵感"到"成稿"之间最艰难的鸿沟。它将 AI 的生成能力与精心设计的写作工作流相结合——让你专注于故事本身，而非格式、组织或反复的复制粘贴。
+
+**NovelCraft** is a novel-writing assistant powered by large language models. It provides a structured, efficient, and collaborative writing environment — helping authors bridge the gap between inspiration and finished manuscript.
+
+Whether you're a web novel author, a fan-fiction writer, or someone just starting their creative journey, NovelCraft combines AI generation with a carefully designed writing workflow. Focus on your story, not on formatting, organizing, or copy-pasting.
+
+---
+
+### 🎯 解决什么问题 · Why This Exists
+
+| 痛点 | NovelCraft 的方案 |
+|------|-------------------|
+| AI 聊天窗口写长文，复制粘贴来回切换 | 对话与正文面板同屏，内容自动归位 |
+| 写了后面忘了前面，角色设定散落各处 | 侧边栏统一管理角色卡与情节大纲 |
+| 想让 AI 续写，每次都要重新描述上下文 | 一键续写，自动携带角色、大纲、前文 |
+| 修改一段内容，结果全文被替换 | 智能追加/替换双模式 + 多级安全拦截 |
+| 多个故事同时进行，文件管理混乱 | 多小说项目切换，数据独立存储 |
+| 想导出给朋友看，格式不统一 | 一键导出 TXT / Word / PDF |
 
 ---
 
